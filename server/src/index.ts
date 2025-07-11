@@ -7,7 +7,7 @@ import userRoutes from "./routes/user.routes";
 
 dotenv.config();
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8080;
 const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3000";
 
 app.use(
@@ -18,34 +18,22 @@ app.use(
 );
 app.use(express.json());
 
+app.get("/", (req, res) => {
+  res.json({ status: "Server is running" });
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 
-app.get("/health", (req, res) => {
-  res.status(200).json({ status: "ok" });
-});
-
-let isConnected = false;
-
-const connectDB = async () => {
-  if (isConnected) return;
-
-  try {
-    await mongoose.connect(process.env.MONGO_URI!);
-    isConnected = true;
+mongoose
+  .connect(process.env.MONGO_URI!)
+  .then(() => {
     console.log("Connected to MongoDB");
-  } catch (error) {
-    console.error("MongoDB connection error:", error);
-  }
-};
-
-app.use(async (req, res, next) => {
-  await connectDB();
-  next();
-});
-
-if (process.env.NODE_ENV !== "production") {
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-}
-
-export default app;
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("MongoDB connection error:", err);
+    process.exit(1);
+  });
