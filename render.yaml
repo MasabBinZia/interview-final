@@ -2,7 +2,7 @@ services:
   - type: web
     name: interview-server
     env: node
-    buildCommand: cd server && pnpm install && pnpm build
+    buildCommand: cd server && pnpm install --no-frozen-lockfile && pnpm build
     startCommand: cd server && pnpm start
     envVars:
       - key: NODE_ENV
