@@ -1,5 +1,5 @@
-import { Button, buttonVariants } from "@/components/ui/button";
-import Image from "next/image";
+import { buttonVariants } from "@/components/ui/button";
+
 import Link from "next/link";
 
 export default function Home() {
