@@ -21,10 +21,31 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 
-mongoose
-  .connect(process.env.MONGO_URI!)
-  .then(() => console.log("Connected to MongoDB"))
-  .then(() => {
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-  })
-  .catch((err) => console.error(err));
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
+let isConnected = false;
+
+const connectDB = async () => {
+  if (isConnected) return;
+
+  try {
+    await mongoose.connect(process.env.MONGO_URI!);
+    isConnected = true;
+    console.log("Connected to MongoDB");
+  } catch (error) {
+    console.error("MongoDB connection error:", error);
+  }
+};
+
+app.use(async (req, res, next) => {
+  await connectDB();
+  next();
+});
+
+if (process.env.NODE_ENV !== "production") {
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
+
+export default app;
